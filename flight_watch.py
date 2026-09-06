@@ -17,7 +17,7 @@
 
 Никаких сторонних библиотек — только стандартная библиотека Python.
 """
-
+import os
 import json
 import urllib.parse
 import urllib.request
@@ -50,8 +50,8 @@ DIRECT_ONLY = False  # True = только прямые рейсы (в Банг�
 THRESHOLD_RUB = 45000
 
 # Telegram (пока пусто — заполним на следующем шаге)
-TELEGRAM_TOKEN = "8469713158:AAFVSv8FXM6NcH30Vy8ju69gQhGMsTJb5Zk"      # токен бота от @BotFather
-TELEGRAM_CHAT_ID = "1373219560"    # твой chat_id
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
+TELEGRAM_CHAT_ID = "1373219560"
 
 # ==========================================================================
 #  Код ниже трогать не нужно
