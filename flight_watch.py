@@ -30,8 +30,7 @@ truststore.inject_into_ssl()
 #  НАСТРОЙКИ — меняй здесь
 # ==========================================================================
 
-TOKEN = "83a088fdd444e7cf7c7697a4c2695abf"   # токен Travelpayouts (Profile -> API token)
-
+TOKEN = os.environ.get("TRAVELPAYOUTS_TOKEN", "")
 ORIGIN = "MOW"      # Москва (код города, охватывает все аэропорты)
 DEST = "BKK"        # Бангкок (код города, охватывает Suvarnabhumi + Don Mueang)
 CURRENCY = "rub"    # валюта цен
