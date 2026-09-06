@@ -50,7 +50,7 @@ THRESHOLD_RUB = 45000
 
 # Telegram (пока пусто — заполним на следующем шаге)
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
-TELEGRAM_CHAT_ID = "1373219560"
+TELEGRAM_CHAT_ID = "145383436"
 
 # ==========================================================================
 #  Код ниже трогать не нужно
