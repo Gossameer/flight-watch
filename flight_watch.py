@@ -46,7 +46,7 @@ RETURN_DATE = None
 DIRECT_ONLY = False  # True = только прямые рейсы (в Бангкок из Москвы прямых сейчас почти нет)
 
 # Порог «дешёвого» билета в рублях — если цена ниже, шлём уведомление
-THRESHOLD_RUB = 45000
+THRESHOLD_RUB = 30000
 
 # Telegram (пока пусто — заполним на следующем шаге)
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
@@ -60,12 +60,14 @@ API_URL = "https://api.travelpayouts.com/aviasales/v3/prices_for_dates"
 
 
 def fetch_cheapest_for_day(depart: date):
-    """Запрашивает у API самый дешёвый билет на конкретную дату вылета.
-    Возвращает dict с данными билета или None, если ничего не нашлось."""
+    """Запрашивает билеты на конкретную дату.
+    Рассматриваются только прямые рейсы и рейсы максимум с одной пересадкой.
+    Возвращает самый дешёвый подходящий билет или None."""
+
     params = {
         "origin": ORIGIN,
         "destination": DEST,
-        "departure_at": depart.isoformat(),   # YYYY-MM-DD
+        "departure_at": depart.isoformat(),
         "currency": CURRENCY,
         "sorting": "price",
         "direct": "true" if DIRECT_ONLY else "false",
@@ -74,6 +76,7 @@ def fetch_cheapest_for_day(depart: date):
         "one_way": "false" if RETURN_DATE else "true",
         "token": TOKEN,
     }
+
     if RETURN_DATE:
         params["return_at"] = RETURN_DATE.isoformat()
 
@@ -92,13 +95,23 @@ def fetch_cheapest_for_day(depart: date):
         return None
 
     data = payload.get("data") or []
-    if not data:
+
+    # Оставляем только прямые рейсы и рейсы с одной пересадкой
+    suitable = [
+        ticket for ticket in data
+        if ticket.get("transfers", 99) <= 1
+    ]
+
+    if not suitable:
         return None
 
-    # data уже отсортирована по цене (sorting=price), берём первый
-    cheapest = min(data, key=lambda t: t.get("price", 10**9))
-    return cheapest
+    # Из подходящих вариантов выбираем самый дешёвый
+    cheapest = min(
+        suitable,
+        key=lambda t: t.get("price", 10**9)
+    )
 
+    return cheapest
 
 def format_ticket(t):
     """Красивая строчка про билет."""
