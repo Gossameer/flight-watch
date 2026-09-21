@@ -26,9 +26,7 @@ from datetime import date, timedelta
 
 truststore.inject_into_ssl()
 
-# ==========================================================================
-#  НАСТРОЙКИ — меняй здесь
-# ==========================================================================
+
 
 TOKEN = os.environ.get("TRAVELPAYOUTS_TOKEN", "")
 ORIGIN = "MOW"      # Москва (код города, охватывает все аэропорты)
@@ -43,7 +41,7 @@ DATE_TO = date(2026, 11, 7)
 # Если нужен туда-обратно — впиши дату, напр. date(2026, 11, 14)
 RETURN_DATE = None
 
-DIRECT_ONLY = False  # True = только прямые рейсы (в Бангкок из Москвы прямых сейчас почти нет)
+DIRECT_ONLY =  True  # True = только прямые рейсы (в Бангкок из Москвы прямых сейчас почти нет)
 
 # Порог «дешёвого» билета в рублях — если цена ниже, шлём уведомление
 THRESHOLD_RUB = 30000
@@ -52,9 +50,6 @@ THRESHOLD_RUB = 30000
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = "145383436"
 
-# ==========================================================================
-#  Код ниже трогать не нужно
-# ==========================================================================
 
 API_URL = "https://api.travelpayouts.com/aviasales/v3/prices_for_dates"
 
@@ -97,10 +92,18 @@ def fetch_cheapest_for_day(depart: date):
     data = payload.get("data") or []
 
     # Оставляем только прямые рейсы и рейсы с одной пересадкой
-    suitable = [
-        ticket for ticket in data
-        if ticket.get("transfers", 99) <= 1
-    ]
+    # DIRECT_ONLY = True -> только прямые рейсы (0 пересадок).
+    # DIRECT_ONLY = False -> максимум 1 пересадка.
+    if DIRECT_ONLY:
+        suitable = [
+            ticket for ticket in data
+            if ticket.get("transfers", 99) == 0
+        ]
+    else:
+        suitable = [
+            ticket for ticket in data
+            if ticket.get("transfers", 99) <= 1
+        ]
 
     if not suitable:
         return None
